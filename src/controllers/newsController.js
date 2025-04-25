@@ -1,30 +1,63 @@
 const News = require('../models/News');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, 'uploads/');
+	},
+	filename: (req, file, cb) => {
+		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+		const ext = path.extname(file.originalname);
+		cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+	},
+});
+
+const upload = multer({
+	storage,
+	fileFilter: (req, file, cb) => {
+		cb(null, true);
+	},
+}).fields([
+	{ name: 'images', maxCount: 10 },
+	{ name: 'attachments', maxCount: 10 },
+]);
 
 exports.createNews = async (req, res) => {
-	const data = req.body;
-	data.author = req.user.id;
-
-	if (req.files) {
-		if (req.files.some((file) => file.mimetype.startsWith('uploads/'))) {
-			data.images = req.files
-				.filter((file) => file.mimetype.startsWith('uploads/'))
-				.map((file) => file.path);
+	upload(req, res, async (err) => {
+		if (err) {
+			return res
+				.status(400)
+				.json({ message: 'Ошибка загрузки файлов', error: err });
 		}
-		if (req.files.some((file) => !file.mimetype.startsWith('uploads/'))) {
-			data.attachments = req.files
-				.filter((file) => !file.mimetype.startsWith('uploads/'))
-				.map((file) => file.path);
-		}
-	}
 
-	try {
-		const news = new News(data);
-		await news.save();
-		res.json(news);
-	} catch (err) {
-		console.error('Error creating news:', err);
-		res.status(500).json({ message: 'Server error' });
-	}
+		const data = req.body;
+		data.author = req.user.id;
+
+		if (req.files) {
+			if (req.files.images) {
+				data.images = req.files.images.map(
+					(file) =>
+						`${req.protocol}://${req.get('host')}/uploads/${file.filename}`
+				);
+			}
+			if (req.files.attachments) {
+				data.attachments = req.files.attachments.map(
+					(file) =>
+						`${req.protocol}://${req.get('host')}/uploads/${file.filename}`
+				);
+			}
+		}
+
+		try {
+			const news = new News(data);
+			await news.save();
+			res.json(news);
+		} catch (err) {
+			console.error('Error creating news:', err);
+			res.status(500).json({ message: 'Server error' });
+		}
+	});
 };
 
 exports.editNews = async (req, res) => {

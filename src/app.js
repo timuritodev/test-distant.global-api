@@ -5,7 +5,6 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const newsRoutes = require('./routes/news');
 const path = require('path');
-const imagesRoutes = require('./routes/images');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,7 +16,6 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 connectDB();
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
-app.use('/api', imagesRoutes);
 
 app.use(require('./middleware/errorHandler'));
 

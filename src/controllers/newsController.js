@@ -1,8 +1,27 @@
 const News = require('../models/News');
+const upload = require('../middleware/upload');
+
+exports.uploadImages = upload.array('images', 10);
+
+exports.uploadAttachments = upload.array('attachments', 5);
 
 exports.createNews = async (req, res) => {
 	const data = req.body;
 	data.author = req.user.id;
+
+	if (req.files) {
+		if (req.files.some((file) => file.mimetype.startsWith('image/'))) {
+			data.images = req.files
+				.filter((file) => file.mimetype.startsWith('image/'))
+				.map((file) => file.path);
+		}
+		if (req.files.some((file) => !file.mimetype.startsWith('image/'))) {
+			data.attachments = req.files
+				.filter((file) => !file.mimetype.startsWith('image/'))
+				.map((file) => file.path);
+		}
+	}
+
 	try {
 		const news = new News(data);
 		await news.save();

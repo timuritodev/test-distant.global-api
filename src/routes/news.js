@@ -8,6 +8,8 @@ const {
 	getAllNews,
 	getNewsById,
 	getMyNews,
+	uploadImages,
+	uploadAttachments,
 } = require('../controllers/newsController');
 const router = express.Router();
 
@@ -16,7 +18,7 @@ router.get('/:id', getNewsById);
 
 router.use(auth);
 router.get('/my', getMyNews);
-router.post('/', createNews);
+router.post('/', uploadImages, uploadAttachments, createNews);
 router.patch('/:id', editNews);
 router.delete('/:id', deleteNews);
 router.post('/:id/publish', publishNews);

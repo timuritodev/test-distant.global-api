@@ -34,6 +34,17 @@ exports.createNews = async (req, res) => {
 		const data = req.body;
 		data.author = req.user.id;
 
+		if (data.publishAt) {
+			const publishDate = new Date(data.publishAt);
+			if (publishDate > new Date()) {
+				data.status = 'scheduled';
+			} else {
+				data.status = 'published';
+			}
+		} else {
+			data.status = 'draft';
+		}
+
 		if (req.files) {
 			if (req.files.images) {
 				data.images = req.files.images.map(
@@ -67,7 +78,18 @@ exports.editNews = async (req, res) => {
 		if (news.author.toString() !== req.user.id) {
 			return res.status(401).json({ message: 'Not authorized' });
 		}
-		Object.assign(news, req.body);
+
+		const data = req.body;
+		if (data.publishAt) {
+			const publishDate = new Date(data.publishAt);
+			if (publishDate > new Date()) {
+				data.status = 'scheduled';
+			} else {
+				data.status = 'published';
+			}
+		}
+
+		Object.assign(news, data);
 		await news.save();
 		res.json(news);
 	} catch (err) {

@@ -5,8 +5,13 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const newsRoutes = require('./routes/news');
 const path = require('path');
+const http = require('http');
+const { initializeSocket } = require('./services/socketService');
 
 const app = express();
+const server = http.createServer(app);
+const io = initializeSocket(server);
+
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
@@ -21,4 +26,4 @@ app.use(require('./middleware/errorHandler'));
 
 require('./scheduler/publishScheduler');
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

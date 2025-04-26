@@ -1,6 +1,7 @@
 const News = require('../models/News');
 const multer = require('multer');
 const path = require('path');
+const { sendNotification } = require('../services/socketService');
 
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
@@ -63,6 +64,12 @@ exports.createNews = async (req, res) => {
 		try {
 			const news = new News(data);
 			await news.save();
+
+			sendNotification('news_created', {
+				message: `Создана новая новость: "${news.title}"`,
+				newsId: news._id,
+			});
+
 			res.json(news);
 		} catch (err) {
 			console.error('Error creating news:', err);
@@ -91,6 +98,12 @@ exports.editNews = async (req, res) => {
 
 		Object.assign(news, data);
 		await news.save();
+
+		sendNotification('news_updated', {
+			message: `Новость "${news.title}" была изменена`,
+			newsId: news._id,
+		});
+
 		res.json(news);
 	} catch (err) {
 		console.error('Error editing news:', err);
@@ -110,6 +123,12 @@ exports.deleteNews = async (req, res) => {
 		}
 
 		await News.deleteOne({ _id: req.params.id });
+
+		sendNotification('news_deleted', {
+			message: `Новость "${news.title}" была удалена`,
+			newsId: news._id,
+		});
+
 		res.json({ message: 'News deleted' });
 	} catch (err) {
 		console.error('Error deleting news:', err);
@@ -126,6 +145,12 @@ exports.publishNews = async (req, res) => {
 		}
 		news.status = 'published';
 		await news.save();
+
+		sendNotification('news_published', {
+			message: `Новость "${news.title}" была опубликована`,
+			newsId: news._id,
+		});
+
 		res.json(news);
 	} catch (err) {
 		console.error('Error publishing news:', err);

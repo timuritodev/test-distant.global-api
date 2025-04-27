@@ -1,7 +1,7 @@
 {
 	"name": "test-distant.global-api",
 	"version": "1.0.0",
-	"description": "News API Backend with Node.js and Express",
+	"description": "Posts API Backend with Node.js and Express",
 	"main": "src/app.js",
 	"scripts": {
 		"start": "node src/app.js",

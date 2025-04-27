@@ -1,6 +1,6 @@
 const { Schema, model: createModel } = require('mongoose');
 
-const NewsSchema = new Schema(
+const PostsSchema = new Schema(
 	{
 		author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 		title: { type: String, required: true },
@@ -17,4 +17,4 @@ const NewsSchema = new Schema(
 	{ timestamps: true }
 );
 
-module.exports = createModel('News', NewsSchema);
+module.exports = createModel('Posts', PostsSchema);

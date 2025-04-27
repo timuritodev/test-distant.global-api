@@ -1,4 +1,4 @@
-const News = require('../models/News');
+const Posts = require('../models/Posts');
 const multer = require('multer');
 const path = require('path');
 const { sendNotification } = require('../services/socketService');
@@ -24,7 +24,7 @@ const upload = multer({
 	{ name: 'attachments', maxCount: 10 },
 ]);
 
-exports.createNews = async (req, res) => {
+exports.createPosts = async (req, res) => {
 	upload(req, res, async (err) => {
 		if (err) {
 			return res
@@ -62,27 +62,27 @@ exports.createNews = async (req, res) => {
 		}
 
 		try {
-			const news = new News(data);
-			await news.save();
+			const posts = new Posts(data);
+			await posts.save();
 
-			sendNotification('news_created', {
-				message: `Создана новая новость: "${news.title}"`,
-				newsId: news._id,
+			sendNotification('posts_created', {
+				message: `Создана новая новость: "${posts.title}"`,
+				postsId: posts._id,
 			});
 
-			res.json(news);
+			res.json(posts);
 		} catch (err) {
-			console.error('Error creating news:', err);
+			console.error('Error creating posts:', err);
 			res.status(500).json({ message: 'Server error' });
 		}
 	});
 };
 
-exports.editNews = async (req, res) => {
+exports.editPosts = async (req, res) => {
 	try {
-		const news = await News.findById(req.params.id);
-		if (!news) return res.status(404).json({ message: 'News not found' });
-		if (news.author.toString() !== req.user.id) {
+		const posts = await Posts.findById(req.params.id);
+		if (!posts) return res.status(404).json({ message: 'Posts not found' });
+		if (posts.author.toString() !== req.user.id) {
 			return res.status(401).json({ message: 'Not authorized' });
 		}
 
@@ -96,101 +96,101 @@ exports.editNews = async (req, res) => {
 			}
 		}
 
-		Object.assign(news, data);
-		await news.save();
+		Object.assign(posts, data);
+		await posts.save();
 
-		sendNotification('news_updated', {
-			message: `Новость "${news.title}" была изменена`,
-			newsId: news._id,
+		sendNotification('posts_updated', {
+			message: `Новость "${posts.title}" была изменена`,
+			postsId: posts._id,
 		});
 
-		res.json(news);
+		res.json(posts);
 	} catch (err) {
-		console.error('Error editing news:', err);
+		console.error('Error editing posts:', err);
 		res.status(500).json({ message: 'Server error' });
 	}
 };
 
-exports.deleteNews = async (req, res) => {
+exports.deletePosts = async (req, res) => {
 	try {
-		const news = await News.findById(req.params.id);
-		if (!news) {
-			return res.status(404).json({ message: 'News not found' });
+		const posts = await Posts.findById(req.params.id);
+		if (!posts) {
+			return res.status(404).json({ message: 'Posts not found' });
 		}
 
-		if (news.author.toString() !== req.user.id) {
+		if (posts.author.toString() !== req.user.id) {
 			return res.status(401).json({ message: 'Not authorized' });
 		}
 
-		await News.deleteOne({ _id: req.params.id });
+		await Posts.deleteOne({ _id: req.params.id });
 
-		sendNotification('news_deleted', {
-			message: `Новость "${news.title}" была удалена`,
-			newsId: news._id,
+		sendNotification('posts_deleted', {
+			message: `Новость "${posts.title}" была удалена`,
+			postsId: posts._id,
 		});
 
-		res.json({ message: 'News deleted' });
+		res.json({ message: 'Posts deleted' });
 	} catch (err) {
-		console.error('Error deleting news:', err);
+		console.error('Error deleting posts:', err);
 		res.status(500).json({ message: 'Server error' });
 	}
 };
 
-exports.publishNews = async (req, res) => {
+exports.publishPosts = async (req, res) => {
 	try {
-		const news = await News.findById(req.params.id);
-		if (!news) return res.status(404).json({ message: 'News not found' });
-		if (news.author.toString() !== req.user.id) {
+		const posts = await Posts.findById(req.params.id);
+		if (!posts) return res.status(404).json({ message: 'Posts not found' });
+		if (posts.author.toString() !== req.user.id) {
 			return res.status(401).json({ message: 'Not authorized' });
 		}
-		news.status = 'published';
-		await news.save();
+		posts.status = 'published';
+		await posts.save();
 
-		sendNotification('news_published', {
-			message: `Новость "${news.title}" была опубликована`,
-			newsId: news._id,
+		sendNotification('posts_published', {
+			message: `Новость "${posts.title}" была опубликована`,
+			postsId: posts._id,
 		});
 
-		res.json(news);
+		res.json(posts);
 	} catch (err) {
-		console.error('Error publishing news:', err);
+		console.error('Error publishing posts:', err);
 		res.status(500).json({ message: 'Server error' });
 	}
 };
 
-exports.getAllNews = async (req, res) => {
+exports.getAllPosts = async (req, res) => {
 	try {
-		const news = await News.find().populate('author', 'username email');
-		res.json(news);
+		const posts = await Posts.find().populate('author', 'username email');
+		res.json(posts);
 	} catch (err) {
-		console.error('Error getting all news:', err);
+		console.error('Error getting all posts:', err);
 		res.status(500).json({ message: 'Server error' });
 	}
 };
 
-exports.getNewsById = async (req, res) => {
+exports.getPostsById = async (req, res) => {
 	try {
-		const news = await News.findById(req.params.id).populate(
+		const posts = await Posts.findById(req.params.id).populate(
 			'author',
 			'username email'
 		);
-		if (!news) return res.status(404).json({ message: 'News not found' });
-		res.json(news);
+		if (!posts) return res.status(404).json({ message: 'Posts not found' });
+		res.json(posts);
 	} catch (err) {
-		console.error('Error getting news by ID:', err);
+		console.error('Error getting posts by ID:', err);
 		res.status(500).json({ message: 'Server error' });
 	}
 };
 
-exports.getMyNews = async (req, res) => {
+exports.getMyPosts = async (req, res) => {
 	try {
-		const news = await News.find({ author: req.user.id }).populate(
+		const posts = await Posts.find({ author: req.user.id }).populate(
 			'author',
 			'username email'
 		);
-		res.json(news);
+		res.json(posts);
 	} catch (err) {
-		console.error('Error getting user news:', err);
+		console.error('Error getting user posts:', err);
 		res.status(500).json({ message: 'Server error' });
 	}
 };

@@ -48,7 +48,7 @@ const sendNotification = (event, data) => {
 			message: data.message,
 			createdAt: new Date().toISOString(),
 			read: false,
-			newsId: data.newsId,
+			postsId: data.postsId,
 		});
 	}
 };

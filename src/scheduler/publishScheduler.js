@@ -1,18 +1,18 @@
 const cron = require('node-cron');
-const News = require('../models/News');
+const Posts = require('../models/Posts');
 
 cron.schedule('* * * * *', async () => {
 	try {
 		const now = new Date();
-		const newsToPublish = await News.find({
+		const postsToPublish = await Posts.find({
 			status: 'scheduled',
 			publishAt: { $lte: now },
 		});
 
-		for (const news of newsToPublish) {
-			news.status = 'published';
-			await news.save();
-			console.log(`Новость "${news.title}" опубликована автоматически`);
+		for (const posts of postsToPublish) {
+			posts.status = 'published';
+			await posts.save();
+			console.log(`Новость "${posts.title}" опубликована автоматически`);
 		}
 	} catch (error) {
 		console.error('Ошибка при автоматической публикации новостей:', error);

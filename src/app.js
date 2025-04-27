@@ -3,7 +3,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const newsRoutes = require('./routes/news');
+const postsRoutes = require('./routes/posts');
 const path = require('path');
 const http = require('http');
 const { initializeSocket } = require('./services/socketService');
@@ -20,7 +20,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 connectDB();
 app.use('/api/auth', authRoutes);
-app.use('/api/news', newsRoutes);
+app.use('/api/posts', postsRoutes);
 
 app.use(require('./middleware/errorHandler'));
 
